@@ -1,43 +1,61 @@
 import pygame as pg
-
-gravity = 1
+GRAVITY = 1
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, sprite_path, start_pos, controls, speed=5, size=(48, 48)):
+    def __init__(self, sprite_path, start_pos, controls, speed=10, jump_strenght=-25, size=(40, 48)):
         super().__init__()
         self.controls = controls
         self.speed = speed
+        self.jump_strenght = jump_strenght
         self.y_vel = 0
+        self.x_vel = 0
+        self.grounded = False
 
-        # 1) Carrega a imagem e força o tamanho
-        raw = pg.image.load(sprite_path).convert_alpha()
-        scaled = pg.transform.scale(raw, size)
+        img = pg.transform.scale(pg.image.load(sprite_path).convert_alpha(), size)
+        self.img_left  = img
+        self.img_right = pg.transform.flip(img, True, False)
 
-        self.orig_image = scaled
-        self.flip_image = pg.transform.flip(self.orig_image, True, False)
-
-        # Começa usando a original
-        self.image = self.orig_image
+        self.image = self.img_right
         self.rect  = self.image.get_rect(center=start_pos)
 
-    def update(self, keys, screen_rect):
-
-        # mover à esquerda
+    def update(self, keys, platforms, screen_rect):
+        # Calculate X velocity based on input
+        x_vel = 0
         if keys[self.controls['left']]:
-            self.rect.x -= self.speed
-            self.image = self.orig_image
-        # mover à direita
-        if keys[self.controls['right']]:
-            self.rect.x += self.speed
-            self.image = self.flip_image
+            x_vel = -self.speed
+            self.image = self.img_left
+        elif keys[self.controls['right']]:
+            x_vel =  self.speed
+            self.image = self.img_right
 
-        
+        # Move x axis based on velocity, then apply collision
+        self.rect.x += x_vel
+        if x_vel != 0:
+            hits = pg.sprite.spritecollide(self, platforms, False)
+            for p in hits:
+                if x_vel > 0:        #~ moving right
+                    self.rect.right = p.rect.left
+                else:                #~ moving left
+                    self.rect.left  = p.rect.right
 
-        if keys[self.controls['up']] and self.rect.bottom >= 500:
-            self.y_vel = -12   # valor negativo faz subir
+        #~ jump only if on ground
+        if keys[self.controls['up']] and self.grounded:
+            self.y_vel = self.jump_strenght
 
-        self.y_vel += gravity
+        #~ apply gravity and move on Y
+        self.y_vel += GRAVITY
         self.rect.y += self.y_vel
 
-        # mantém dentro da tela
+        #~ vertical collisions
+        self.grounded = False
+        hits = pg.sprite.spritecollide(self, platforms, False)
+        for p in hits:
+            if self.y_vel > 0:       #~ falling
+                self.rect.bottom = p.rect.top
+                self.grounded = True
+            elif self.y_vel < 0:     #~ rising
+                self.rect.top = p.rect.bottom
+            self.y_vel = 0
+
+        #~ keep player inside the screen
         self.rect.clamp_ip(screen_rect)
