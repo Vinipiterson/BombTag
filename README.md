@@ -2,6 +2,13 @@ A Small game created for a school project.
 
 Used pygame to create a game similar to Bomb Tag (from the game move or die)
 
+Controls:
+- WASD - Player 1 movement (green) Obs: S cancels jump
+- Arrows - Player 2 movement (blue) Obs: Down arrow cancels jump
+- R - Go to next round (On round over screen)
+- N - Start new game (On round over screen)
+
+Elementos da atividade: (apagar, serve como TODO)
 * Tela funcional do ambiente **Pygame**; item que contabiliza **10 %** na nota; FEITO
 * Um elemento (personagem principal, ex.: **cubo**) que apresenta movimentação em pelo menos uma direção (vertical / horizontal). Item que contabiliza até **10 %** adicionais na nota; FEITO
 * Um **2º elemento** (personagem secundário / segundo jogador / inimigo, ex.: **cubo**) que apresenta movimentação em pelo menos uma direção (vertical / horizontal). Item que contabiliza **10 %** adicionais na nota; FEITO
