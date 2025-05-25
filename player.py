@@ -27,6 +27,10 @@ class Player(pg.sprite.Sprite):
         elif keys[self.controls['right']]:
             x_vel =  self.speed
             self.image = self.img_right
+            
+        if keys[self.controls['down']]:
+            if (self.y_vel < 0): # is going upwards
+                self.y_vel = GRAVITY * 10
 
         # Move x axis based on velocity, then apply collision
         self.rect.x += x_vel

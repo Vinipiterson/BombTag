@@ -1,27 +1,37 @@
 import pygame as pg
 from sys import exit
 from player import Player
-from bomb import Bomb
+from bomb import Bomb, BEEPEVENT
 from blockingPlatform import Platform
 import random as rnd
 
 pg.init()
+pg.mixer.init()
 pg.display.set_caption("Bomb Tag – by Vinicius, Hugo e Felipe")
 
+# screen
 display     = pg.display.set_mode((0, 0), pg.FULLSCREEN)
 screen_rect = display.get_rect()
 
+# clock
 clock       = pg.time.Clock()
 
+# fonts
 headerfont = pg.font.SysFont(None, 80)
 font = pg.font.SysFont(None, 56)
 subfont = pg.font.SysFont(None, 30)
 
+# sfx
+soundtrack = pg.mixer.music.load("sfx\soundtrack.mp3")
+pg.mixer.music.set_volume(0.03)
+
 screen_id = 0 # 0 - Game screen; 1 - round over screen; 3 - game over screen; 4 - main menu screen
 
+# round related stuff
 scores = [0, 0]
 last_winner = -1
 
+#~ Level
 def make_platforms():
     w, h = screen_rect.size
     platforms = []
@@ -57,10 +67,13 @@ def make_platforms():
                 platforms.append(Platform(pg.Rect(x, y, width, height)))
 
     return pg.sprite.Group(platforms)
+#~ Level
 
-platforms = make_platforms()
-
-#~ Players
+#~ Player
+controls_p1 = {'left': pg.K_a,    'right': pg.K_d,
+               'up':   pg.K_w,    'down':  pg.K_s}
+controls_p2 = {'left': pg.K_LEFT,'right': pg.K_RIGHT,
+               'up':   pg.K_UP,   'down':  pg.K_DOWN}
 
 def spawn_players():
     return pg.sprite.Group(
@@ -80,17 +93,9 @@ def explode(player):
     
     # Round over screen
     screen_id = 1
+#~ Player
 
-controls_p1 = {'left': pg.K_a,    'right': pg.K_d,
-               'up':   pg.K_w,    'down':  pg.K_s}
-controls_p2 = {'left': pg.K_LEFT,'right': pg.K_RIGHT,
-               'up':   pg.K_UP,   'down':  pg.K_DOWN}
-
-players = spawn_players()
-
-bomb = Bomb(rnd.choice(players.sprites()), explode)
-
-#~ -------- Main loop ---------------------------------------------------------
+#~ Game
 def game_screen(dt):
     display.fill((40, 40, 40))
     players.update(pg.key.get_pressed(), platforms, screen_rect)
@@ -106,7 +111,7 @@ def game_screen(dt):
 
     platforms.draw(display)
     players.draw(display)
-    display.blit(bomb.image, bomb.rect)
+    if (bomb.should_draw): display.blit(bomb.image, bomb.rect)
     display.blit(timer_surface, timer_rect)
     display.blit(score_surface, score_rect)
     
@@ -117,7 +122,7 @@ def round_over_screen():
     winner_surface = font.render(f'Player {last_winner} won the round!', True, (255, 255, 255))
     winner_rect = winner_surface.get_rect(center = screen_rect.center)
     
-    restart_surface = subfont.render('Press R to proceed to next round', True, (255, 255, 255))
+    restart_surface = subfont.render('Press "R" to proceed to next round or "N" to start a new game', True, (255, 255, 255))
     restart_rect = restart_surface.get_rect(center = screen_rect.center)
     restart_rect.y += 50
     
@@ -134,9 +139,16 @@ def handle_events():
         if e.type == pg.QUIT or (e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE):
             pg.quit()
             exit()
-        if (e.type == pg.KEYDOWN and e.key == pg.K_r and screen_id):
+        if (e.type == pg.KEYDOWN and e.key == pg.K_r):
             if (screen_id == 1):
                 next_round()
+        if (e.type == pg.KEYDOWN and e.key == pg.K_n):
+            if (screen_id == 1):
+                scores[0] = 0
+                scores[1] = 0
+                next_round()
+        if (e.type == BEEPEVENT):
+            bomb.beep()
 
 def next_round():
     global platforms, players, bomb, screen_id, last_winner
@@ -152,7 +164,13 @@ def next_round():
 
     last_winner = "none"
     screen_id = 0
+#~ Game
 
+platforms = make_platforms() # Change from procedural generation to prefabs
+players = spawn_players()
+bomb = Bomb(rnd.choice(players.sprites()), explode)
+
+pg.mixer.music.play(-1) # -1 to loop infinitely
 while True:
     handle_events()
     delta_time = clock.tick(60) / 1000

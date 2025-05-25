@@ -1,26 +1,43 @@
 import pygame as pg
 
+pg.mixer.init()
+
+slap = pg.mixer.Sound("sfx\slap.mp3")
+slap.set_volume(0.2)
+
+beep = pg.mixer.Sound(r"sfx\beep.ogg")
+beep.set_volume(0.5)
+charge = pg.mixer.Sound(r"sfx\bomb_charge.ogg")
+charge.set_volume(0.5)
+detonate = pg.mixer.Sound(r"sfx\bomb_detonate.ogg")
+detonate.set_volume(1)
+
+BEEPEVENT = pg.USEREVENT + 1
+
 class Bomb(pg.sprite.Sprite):
-    def __init__(self, owner, explode, cooldown=0.4, explosion_time = 5, size=20):
+    def __init__(self, owner, explode_event, cooldown=0.4, explosion_time = 20, size=20):
         super().__init__()
         self.owner = owner
-        self.expode = explode
+        self.expode_event = explode_event
         self.cooldown = cooldown
         self.explosion_time = explosion_time
         self.cooldown_timer = 0
         self.timer = 0
+        self.should_draw = True
         self.image = pg.Surface((size, size), pg.SRCALPHA)
         pg.draw.circle(self.image, (230, 40, 40), (size // 2, size // 2), size // 2)
         self.rect = self.image.get_rect(center=owner.rect.center)
-
-    def update(self, players, delta_time):
         
+        pg.time.set_timer(BEEPEVENT, 1000, 1)
+
+    def update(self, players, delta_time):        
         self.timer += delta_time
         self.cooldown_timer += delta_time
         self.rect.center = self.owner.rect.center
         
         if (self.timer >= self.explosion_time):
-            self.expode(self.owner)
+            detonate.play()
+            self.expode_event(self.owner)
         
         if self.cooldown_timer < self.cooldown:
             return
@@ -32,5 +49,29 @@ class Bomb(pg.sprite.Sprite):
             if pg.sprite.collide_rect(self, player):
                 self.owner = player
                 self.cooldown_timer = 0
-                #todo - Play sound
+                
+                slap.play()
                 break
+    
+    def beep(self):
+        beep.play()
+        
+        time_remaining = self.explosion_time - self.timer
+        
+        if (time_remaining <= 1):
+            charge.play()
+        elif (time_remaining <= 3):
+            pg.time.set_timer(BEEPEVENT, 75, 1)
+        elif (time_remaining <= 5):
+            pg.time.set_timer(BEEPEVENT, 125, 1)
+        elif (time_remaining <= 7):
+            pg.time.set_timer(BEEPEVENT, 250, 1)
+        elif (time_remaining <= 10):
+            pg.time.set_timer(BEEPEVENT, 500, 1)
+        else:
+            pg.time.set_timer(BEEPEVENT, 1000, 1)
+            
+        if (time_remaining < 7 and time_remaining > 1):
+            self.should_draw = not self.should_draw
+        else:
+            self.should_draw = True
