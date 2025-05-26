@@ -1,8 +1,8 @@
 import pygame as pg
-GRAVITY = 1
+GRAVITY = 1.25
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, sprite_path, start_pos, controls, speed=10, jump_strenght=-25, size=(40, 48)):
+    def __init__(self, sprite_path, start_pos, controls, speed=10, jump_strenght=-27, size=(64, 64)):
         super().__init__()
         self.controls = controls
         self.speed = speed
@@ -11,9 +11,8 @@ class Player(pg.sprite.Sprite):
         self.x_vel = 0
         self.grounded = False
 
-        img = pg.transform.scale(pg.image.load(sprite_path).convert_alpha(), size)
-        self.img_left  = img
-        self.img_right = pg.transform.flip(img, True, False)
+        self.img_left = pg.transform.scale(pg.image.load(sprite_path).convert_alpha(), size)
+        self.img_right = pg.transform.flip(self.img_left, True, False)
 
         self.image = self.img_right
         self.rect  = self.image.get_rect(center=start_pos)

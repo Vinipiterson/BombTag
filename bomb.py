@@ -15,7 +15,7 @@ detonate.set_volume(1)
 BEEPEVENT = pg.USEREVENT + 1
 
 class Bomb(pg.sprite.Sprite):
-    def __init__(self, owner, explode_event, cooldown=0.4, explosion_time = 20, size=20):
+    def __init__(self, owner, explode_event, cooldown=0.4, explosion_time = 20, size=(64, 32)):
         super().__init__()
         self.owner = owner
         self.expode_event = explode_event
@@ -23,10 +23,13 @@ class Bomb(pg.sprite.Sprite):
         self.explosion_time = explosion_time
         self.cooldown_timer = 0
         self.timer = 0
-        self.should_draw = True
-        self.image = pg.Surface((size, size), pg.SRCALPHA)
-        pg.draw.circle(self.image, (230, 40, 40), (size // 2, size // 2), size // 2)
+        self.should_hide = True
+        
+        self.image = pg.transform.scale(pg.image.load("sprites/bomb_strap.png"), size)
         self.rect = self.image.get_rect(center=owner.rect.center)
+        
+        self.light = pg.image.load("sprites/bomb_light.png")
+        self.light_rect = self.light.get_rect(center=owner.rect.center)
         
         pg.time.set_timer(BEEPEVENT, 1000, 1)
 
@@ -34,6 +37,7 @@ class Bomb(pg.sprite.Sprite):
         self.timer += delta_time
         self.cooldown_timer += delta_time
         self.rect.center = self.owner.rect.center
+        self.light_rect.center = self.owner.rect.center
         
         if (self.timer >= self.explosion_time):
             detonate.play()
@@ -46,7 +50,7 @@ class Bomb(pg.sprite.Sprite):
             if player is self.owner:
                 continue
             
-            if pg.sprite.collide_rect(self, player):
+            if pg.sprite.collide_rect(self.owner, player):
                 self.owner = player
                 self.cooldown_timer = 0
                 
@@ -71,7 +75,13 @@ class Bomb(pg.sprite.Sprite):
         else:
             pg.time.set_timer(BEEPEVENT, 1000, 1)
             
-        if (time_remaining < 7 and time_remaining > 1):
-            self.should_draw = not self.should_draw
+        if (time_remaining < 20 and time_remaining > 1):
+            self.should_hide = not self.should_hide
         else:
-            self.should_draw = True
+            self.should_hide = False
+            
+    def render(self, display):
+        display.blit(self.image, self.rect)
+        if (not self.should_hide): display.blit(self.light, self.light_rect)
+        
+        

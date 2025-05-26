@@ -2,8 +2,9 @@ import pygame as pg
 from sys import exit
 from player import Player
 from bomb import Bomb, BEEPEVENT
-from blockingPlatform import Platform
+from blockingPlatform import Platform, Floor
 import random as rnd
+from levels import get_random_map
 
 pg.init()
 pg.mixer.init()
@@ -14,7 +15,7 @@ display     = pg.display.set_mode((0, 0), pg.FULLSCREEN)
 screen_rect = display.get_rect()
 
 # clock
-clock       = pg.time.Clock()
+clock = pg.time.Clock()
 
 # fonts
 headerfont = pg.font.SysFont(None, 80)
@@ -31,43 +32,7 @@ screen_id = 0 # 0 - Game screen; 1 - round over screen; 3 - game over screen; 4 
 scores = [0, 0]
 last_winner = -1
 
-#~ Level
-def make_platforms():
-    w, h = screen_rect.size
-    platforms = []
-
-    #~ Floor
-    platforms.append(Platform(pg.Rect(0, h - 40, w, 40)))
-    #platforms.append(Platform(pg.Rect((w/2) - 5, (h/2) - 5, 10, h))) # - Middle marker
-
-    rows = 3
-    columns = 4
-    
-    row_distance = 220 #h/rows
-    column_distance = w/(columns-1)
-
-    for row in range(rows):
-        row_factor = 1.0 - row * 0.1
-
-        for column in range(columns):
-            spawn_chance = 80 * row_factor
-            
-            if (rnd.randrange(1, 100) < spawn_chance): #
-                height = 25
-                width = rnd.randrange(350, 450)
-                
-                if (column == 0 or column == columns-1):
-                    width = 500
-                    
-                width *= row_factor
-                
-                x = (column_distance * column) - (width/2)
-                y = h - (row_distance * (row + 1))
-                
-                platforms.append(Platform(pg.Rect(x, y, width, height)))
-
-    return pg.sprite.Group(platforms)
-#~ Level
+bg = pg.image.load("sprites/bg.png").convert()
 
 #~ Player
 controls_p1 = {'left': pg.K_a,    'right': pg.K_d,
@@ -97,7 +62,7 @@ def explode(player):
 
 #~ Game
 def game_screen(dt):
-    display.fill((40, 40, 40))
+    display.blit(bg, (0, 0))
     players.update(pg.key.get_pressed(), platforms, screen_rect)
     bomb.update(players, dt)
     
@@ -111,13 +76,13 @@ def game_screen(dt):
 
     platforms.draw(display)
     players.draw(display)
-    if (bomb.should_draw): display.blit(bomb.image, bomb.rect)
+    bomb.render(display)
     display.blit(timer_surface, timer_rect)
     display.blit(score_surface, score_rect)
     
 def round_over_screen():
     w, h = screen_rect.size
-    display.fill((40, 40, 40))
+    display.blit(bg, (0, 0))
     
     winner_surface = font.render(f'Player {last_winner} won the round!', True, (255, 255, 255))
     winner_rect = winner_surface.get_rect(center = screen_rect.center)
@@ -154,7 +119,7 @@ def next_round():
     global platforms, players, bomb, screen_id, last_winner
 
     #~ regenerate level geometry
-    platforms = make_platforms()
+    platforms = get_random_map(screen_rect)
 
     #~ respawn players
     players = spawn_players()
@@ -166,7 +131,7 @@ def next_round():
     screen_id = 0
 #~ Game
 
-platforms = make_platforms() # Change from procedural generation to prefabs
+platforms = get_random_map(screen_rect)
 players = spawn_players()
 bomb = Bomb(rnd.choice(players.sprites()), explode)
 
