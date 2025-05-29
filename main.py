@@ -8,23 +8,23 @@ from levels import get_random_map
 
 pg.init()
 pg.mixer.init()
-pg.display.set_caption("Bomb Tag – by Vinicius, Hugo e Felipe")
+pg.display.set_caption("Bomb Tag – por Vinicius, Hugo e Felipe")
 
 # screen
-display     = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+display = pg.display.set_mode((0, 0), pg.WINDOWMAXIMIZED)
 screen_rect = display.get_rect()
 
 # clock
 clock = pg.time.Clock()
 
 # fonts
-headerfont = pg.font.SysFont(None, 80)
-font = pg.font.SysFont(None, 56)
-subfont = pg.font.SysFont(None, 30)
+headerfont = pg.font.Font("font/Super Squad.ttf", 40) #SysFont(None, 80)
+font = pg.font.Font("font/Super Squad.ttf", 25)
+subfont = pg.font.Font("font/Super Squad.ttf", 15)
 
 # sfx
 soundtrack = pg.mixer.music.load("sfx\soundtrack.mp3")
-pg.mixer.music.set_volume(0.03)
+pg.mixer.music.set_volume(0.02)
 
 screen_id = 0 # 0 - Game screen; 1 - round over screen; 3 - game over screen; 4 - main menu screen
 
@@ -42,8 +42,8 @@ controls_p2 = {'left': pg.K_LEFT,'right': pg.K_RIGHT,
 
 def spawn_players():
     return pg.sprite.Group(
-    Player('sprites/green.png', (350, screen_rect.height - 50), controls_p1),
-    Player('sprites/blue.png',  (screen_rect.width - 350, screen_rect.height - 50), controls_p2)
+    Player("green", (350, screen_rect.height - 50), controls_p1),
+    Player('yellow',  (screen_rect.width - 350, screen_rect.height - 50), controls_p2)
 )
 
 def explode(player):
@@ -66,11 +66,11 @@ def game_screen(dt):
     players.update(pg.key.get_pressed(), platforms, screen_rect)
     bomb.update(players, dt)
     
-    timer_surface = headerfont.render(f"{int(bomb.explosion_time - bomb.timer) + 1}", False, (255, 255, 255))
+    timer_surface = headerfont.render(f"{int(bomb.explosion_time - bomb.timer) + 1}", True, (255, 255, 255))
     timer_rect = timer_surface.get_rect(center = screen_rect.center)
     timer_rect.top = 50
     
-    score_surface = font.render(f"{scores[0]} - {scores[1]}", False, (255, 255, 255))
+    score_surface = font.render(f"{scores[0]} - {scores[1]}", True, (255, 255, 255))
     score_rect = score_surface.get_rect(center = screen_rect.center)
     score_rect.top = 120
 
@@ -84,14 +84,15 @@ def round_over_screen():
     w, h = screen_rect.size
     display.blit(bg, (0, 0))
     
-    winner_surface = font.render(f'Player {last_winner} won the round!', True, (255, 255, 255))
+    player_text = ("Green" if last_winner == 1 else "Yellow")
+    winner_surface = font.render(f'{player_text} won the round!', True, (255, 255, 255))
     winner_rect = winner_surface.get_rect(center = screen_rect.center)
     
-    restart_surface = subfont.render('Press "R" to proceed to next round or "N" to start a new game', True, (255, 255, 255))
+    restart_surface = subfont.render('Press "R" to proceed to next round or "N" to start from scratch', True, (255, 255, 255))
     restart_rect = restart_surface.get_rect(center = screen_rect.center)
     restart_rect.y += 50
     
-    score_surface = font.render(f"{scores[0]} - {scores[1]}", False, (255, 255, 255))
+    score_surface = font.render(f"{scores[0]} - {scores[1]}", True, (255, 255, 255))
     score_rect = score_surface.get_rect(center = screen_rect.center)
     score_rect.top = 120
     
@@ -124,10 +125,10 @@ def next_round():
     #~ respawn players
     players = spawn_players()
 
-    #~ give bomb to a random player
-    bomb = Bomb(rnd.choice(players.sprites()), explode)
+    #~ give bomb to the last winner
+    bomb = Bomb(players.sprites()[last_winner-1], explode)
 
-    last_winner = "none"
+    last_winner = -1
     screen_id = 0
 #~ Game
 
@@ -135,7 +136,7 @@ platforms = get_random_map(screen_rect)
 players = spawn_players()
 bomb = Bomb(rnd.choice(players.sprites()), explode)
 
-pg.mixer.music.play(-1) # -1 to loop infinitely
+pg.mixer.music.play(-1)
 while True:
     handle_events()
     delta_time = clock.tick(60) / 1000

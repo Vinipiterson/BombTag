@@ -2,7 +2,7 @@ import pygame as pg
 GRAVITY = 1.25
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, sprite_path, start_pos, controls, speed=10, jump_strenght=-27, size=(64, 64)):
+    def __init__(self, color, start_pos, controls, speed=10, jump_strenght=-27, size=(64, 64)):
         super().__init__()
         self.controls = controls
         self.speed = speed
@@ -10,22 +10,42 @@ class Player(pg.sprite.Sprite):
         self.y_vel = 0
         self.x_vel = 0
         self.grounded = False
+        self.color = color
+        self.expression = "happy"
+        self.direction = "right"
+        self.happy = pg.transform.scale(pg.image.load(f"sprites/{self.color}/Happy.png").convert_alpha(), size)
+        self.mad = pg.transform.scale(pg.image.load(f"sprites/{self.color}/Mad.png").convert_alpha(), size)
 
-        self.img_left = pg.transform.scale(pg.image.load(sprite_path).convert_alpha(), size)
-        self.img_right = pg.transform.flip(self.img_left, True, False)
-
-        self.image = self.img_right
+        self.image = self.happy
         self.rect  = self.image.get_rect(center=start_pos)
+
+    def update_expression(self, expression):
+        self.expression = expression
+        
+        img = self.happy if self.expression == "happy" else self.mad
+        if (self.direction == "left"):
+            img = pg.transform.flip(img, True, False)
+            
+        self.image = img
+        
+    def update_direction(self, direction):
+        self.direction = direction
+        
+        img = self.happy if self.expression == "happy" else self.mad
+        if (self.direction == "left"):
+            img = pg.transform.flip(img, True, False)
+            
+        self.image = img
 
     def update(self, keys, platforms, screen_rect):
         # Calculate X velocity based on input
         x_vel = 0
         if keys[self.controls['left']]:
             x_vel = -self.speed
-            self.image = self.img_left
+            self.update_direction("left")
         elif keys[self.controls['right']]:
             x_vel =  self.speed
-            self.image = self.img_right
+            self.update_direction("right")
             
         if keys[self.controls['down']]:
             if (self.y_vel < 0): # is going upwards
