@@ -1,5 +1,6 @@
 import pygame as pg
 from player import Player
+import constants as const
 
 pg.mixer.init()
 
@@ -16,12 +17,12 @@ detonate.set_volume(.5)
 BEEPEVENT = pg.USEREVENT + 1
 
 class Bomb(pg.sprite.Sprite):
-    def __init__(self, owner, explode_event, cooldown=0.4, explosion_time = 20, size=(46, 23)):
+    def __init__(self, owner, explode_event, size=(46, 23)):
         super().__init__()
         self.owner = owner
         self.expode_event = explode_event
-        self.cooldown = cooldown
-        self.explosion_time = explosion_time
+        self.cooldown = const.SWAP_COOLDOWN
+        self.explosion_time = const.EXPLOSION_TIME
         self.cooldown_timer = 0
         self.timer = 0
         self.should_hide = True
@@ -33,6 +34,7 @@ class Bomb(pg.sprite.Sprite):
         self.light_rect = self.light.get_rect(center=owner.rect.center)
         
         self.owner.update_expression("mad")
+        self.owner.speed = const.BOMB_SPEED
         
         pg.time.set_timer(BEEPEVENT, 1000, 1)
 
@@ -57,9 +59,12 @@ class Bomb(pg.sprite.Sprite):
             
             if pg.sprite.collide_rect(self.owner, player):
                 self.owner.update_expression("happy")
+                self.owner.speed = const.PLAYER_SPEED # Speed goes back to normal
                 
                 self.owner = player
                 self.owner.update_expression("mad")
+                self.owner.speed = const.BOMB_SPEED # Speed up
+                        
                 self.cooldown_timer = 0
                 
                 slap.play()

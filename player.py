@@ -1,12 +1,18 @@
 import pygame as pg
-GRAVITY = 1.25
+import constants as const
+
+def spawn_players(screen_rect):
+    return pg.sprite.Group(
+    Player("green", (350, screen_rect.height - 50), const.controls_p1),
+    Player('yellow',  (screen_rect.width - 350, screen_rect.height - 50), const.controls_p2)
+)
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, color, start_pos, controls, speed=10, jump_strenght=-27, size=(64, 64)):
+    def __init__(self, color, start_pos, controls, size=(64, 64)):
         super().__init__()
         self.controls = controls
-        self.speed = speed
-        self.jump_strenght = jump_strenght
+        self.speed = const.PLAYER_SPEED
+        self.jump_strenght = const.JUMP_STRENGHT
         self.y_vel = 0
         self.x_vel = 0
         self.grounded = False
@@ -49,7 +55,7 @@ class Player(pg.sprite.Sprite):
             
         if keys[self.controls['down']]:
             if (self.y_vel < 0): # is going upwards
-                self.y_vel = GRAVITY * 10
+                self.y_vel = const.GRAVITY * 10
 
         # Move x axis based on velocity, then apply collision
         self.rect.x += x_vel
@@ -66,7 +72,7 @@ class Player(pg.sprite.Sprite):
             self.y_vel = self.jump_strenght
 
         #~ apply gravity and move on Y
-        self.y_vel += GRAVITY
+        self.y_vel += const.GRAVITY
         self.rect.y += self.y_vel
 
         #~ vertical collisions
