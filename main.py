@@ -46,11 +46,11 @@ def game_screen(dt):
     
     timer_surface = headerfont.render(f"{int(bomb.explosion_time - bomb.timer) + 1}", True, const.WHITE)
     timer_rect = timer_surface.get_rect(center = screen_rect.center)
-    timer_rect.top = 50
+    timer_rect.top = 20
     
     score_surface = font.render(f"{scores[0]} - {scores[1]}", True, const.WHITE)
     score_rect = score_surface.get_rect(center = screen_rect.center)
-    score_rect.top = 120
+    score_rect.top = 80
 
     platforms.draw(display)
     players.draw(display)

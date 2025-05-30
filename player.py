@@ -3,8 +3,8 @@ import constants as const
 
 def spawn_players(screen_rect):
     return pg.sprite.Group(
-    Player("green", (350, screen_rect.height - 50), const.controls_p1),
-    Player('yellow',  (screen_rect.width - 350, screen_rect.height - 50), const.controls_p2)
+    Player("green", (350, screen_rect.height - 50), const.CONTROLS_P1),
+    Player('yellow',  (screen_rect.width - 350, screen_rect.height - 50), const.CONTROLS_P2)
 )
 
 class Player(pg.sprite.Sprite):
@@ -50,12 +50,8 @@ class Player(pg.sprite.Sprite):
             x_vel = -self.speed
             self.update_direction("left")
         elif keys[self.controls['right']]:
-            x_vel =  self.speed
+            x_vel = self.speed
             self.update_direction("right")
-            
-        if keys[self.controls['down']]:
-            if (self.y_vel < 0): # is going upwards
-                self.y_vel = const.GRAVITY * 10
 
         # Move x axis based on velocity, then apply collision
         self.rect.x += x_vel
@@ -65,11 +61,14 @@ class Player(pg.sprite.Sprite):
                 if x_vel > 0:        #~ moving right
                     self.rect.right = p.rect.left
                 else:                #~ moving left
-                    self.rect.left  = p.rect.right
+                    self.rect.left = p.rect.right
 
         #~ jump only if on ground
         if keys[self.controls['up']] and self.grounded:
             self.y_vel = self.jump_strenght
+        if keys[self.controls['down']]:
+            if (self.y_vel < 0): # is going upwards
+                self.y_vel = const.GRAVITY * 10
 
         #~ apply gravity and move on Y
         self.y_vel += const.GRAVITY
@@ -87,4 +86,4 @@ class Player(pg.sprite.Sprite):
             self.y_vel = 0
 
         #~ keep player inside the screen
-        self.rect.clamp_ip(screen_rect)
+        #self.rect.clamp_ip(screen_rect)

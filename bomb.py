@@ -8,9 +8,9 @@ slap = pg.mixer.Sound("sfx\slap.mp3")
 slap.set_volume(0.2)
 
 beep = pg.mixer.Sound(r"sfx\beep.ogg")
-beep.set_volume(0.1)
+beep.set_volume(.1)
 charge = pg.mixer.Sound(r"sfx\bomb_charge.ogg")
-charge.set_volume(0.15)
+charge.set_volume(.15)
 detonate = pg.mixer.Sound(r"sfx\bomb_detonate.ogg")
 detonate.set_volume(.5)
 
@@ -38,13 +38,12 @@ class Bomb(pg.sprite.Sprite):
         
         pg.time.set_timer(BEEPEVENT, 1000, 1)
 
-    def update(self, players, delta_time):        
+    def update(self, players, delta_time):       
         self.timer += delta_time
         self.cooldown_timer += delta_time
         self.rect.center = self.owner.rect.center
         self.rect.y += 20
         self.light_rect.center = self.rect.center
-        self.light_rect.y += 5
         
         if (self.timer >= self.explosion_time):
             detonate.play()

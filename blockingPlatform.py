@@ -1,7 +1,7 @@
 import pygame as pg
 
 class Platform(pg.sprite.Sprite):
-    def __init__(self, x, y, sprite_path, color=(90, 55, 25)):
+    def __init__(self, x, y, sprite_path):
         super().__init__()
     
         self.image = pg.image.load(sprite_path)

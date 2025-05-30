@@ -6,6 +6,9 @@ s_size = 256
 m_size = 384
 l_size = 512
 
+# adiciona um novo elemento plataforma na posicao 0(x) h-576(tamanho da tela - 576 no eixo y) de tamanho pequeno
+#platforms.append(Platform(0, h-576, "sprites/platform_small.png"))
+
 def map_1(screen_rect):
     w, h = screen_rect.size
     platforms = []
