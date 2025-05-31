@@ -4,7 +4,7 @@ Used pygame to create a game similar to Bomb Tag (from the game move or die)
 
 How to install:
   - Download ZIp
-  - Extract Here (doesn't need to be extract here, just make sure you extract to a root folder. Ex: "C:Downloads/BombTag Master" not "C:Downloads/BombTag Master/BombTag Master")
+  - Extract Here (doesn't need to be extract here, just make sure you extract to a root folder. Ex: "C:Downloads/BombTag Master" not "C:Downloads/BombTag Master/BombTag Master" otherwise the sprites/sounds will not be found)
   - Open extracted folder on vs code
   - run Main.py
 
